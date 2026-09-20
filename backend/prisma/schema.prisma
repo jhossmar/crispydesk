@@ -1,0 +1,28 @@
+// CrispyDesk backend - Prisma schema
+// This backend only owns Auth (users/roles). Business data (productos,
+// ventas, inventario, combos, etc.) lives locally on-device in Drift so
+// the POS keeps working offline; see the Flutter app for that schema.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Rol {
+  ADMINISTRADOR
+  CAJERA
+}
+
+model User {
+  id             Int      @id @default(autoincrement())
+  email          String   @unique
+  password       String
+  nombreCompleto String
+  rol            Rol      @default(CAJERA)
+  activo         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+}

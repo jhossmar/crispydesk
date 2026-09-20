@@ -1,48 +1,30 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
+# Root-level ignores for this monorepo (frontend/ and backend/ each have
+# their own .gitignore for tool-specific ignores - this one only covers
+# OS/editor junk that could show up anywhere in the tree).
+
+# macOS
 .DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
+.AppleDouble
+.LSOverride
 
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# Linux
+*~
 
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
-.dart_tool/
-.flutter-plugins-dependencies
-.pub-cache/
-.pub/
-/build/
-/coverage/
+# Editors
+*.swp
+*.swo
+.vscode/
+!.vscode/extensions.json
 
-# Symbolication related
-app.*.symbols
+# Logs
+*.log
 
-# Obfuscation related
-app.*.map.json
-
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-
-# Widget Preview related
-.widget_preview/
+# Env files, wherever they might land
+.env
+.env.local
