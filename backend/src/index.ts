@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import jwt from "jsonwebtoken";
-import { PrismaClient, Rol } from "@prisma/client";
+import { PrismaClient, Prisma, Rol } from "@prisma/client";
 
 const app = express();
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
@@ -158,6 +158,68 @@ app.post("/register", authenticateToken, requireAdmin, async (req: Request, res:
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return res.status(500).json({ message: "Internal server error during registration", error: errorMessage });
+  }
+});
+
+// Edits a user's nombreCompleto/email/rol. Password changes are a separate
+// concern, not handled here.
+app.patch("/users/:id", authenticateToken, requireAdmin, async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const { email, nombreCompleto, rol } = req.body || {};
+
+  if (!email && !nombreCompleto && !rol) {
+    return res.status(400).json({ message: "Nothing to update" });
+  }
+  if (rol && rol !== "ADMINISTRADOR" && rol !== "CAJERA") {
+    return res.status(400).json({ message: "rol must be ADMINISTRADOR or CAJERA" });
+  }
+
+  try {
+    const usuario = await prisma.user.update({
+      where: { id },
+      data: {
+        ...(email ? { email } : {}),
+        ...(nombreCompleto ? { nombreCompleto } : {}),
+        ...(rol ? { rol } : {}),
+      },
+      select: { id: true, email: true, nombreCompleto: true, rol: true, activo: true },
+    });
+    return res.json(usuario);
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return res.status(409).json({ message: "Ese email ya está en uso" });
+    }
+    return res.status(404).json({ message: "User not found" });
+  }
+});
+
+app.get("/users", authenticateToken, requireAdmin, async (req: Request, res: Response) => {
+  const usuarios = await prisma.user.findMany({
+    select: { id: true, email: true, nombreCompleto: true, rol: true, activo: true },
+    orderBy: { id: "asc" },
+  });
+  res.json(usuarios);
+});
+
+// Activates/deactivates a user. We never hard-delete accounts so their
+// sales/audit history (once that exists) always stays attributable.
+app.patch("/users/:id/activo", authenticateToken, requireAdmin, async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const { activo } = req.body || {};
+
+  if (typeof activo !== "boolean") {
+    return res.status(400).json({ message: "activo must be a boolean" });
+  }
+
+  try {
+    const usuario = await prisma.user.update({
+      where: { id },
+      data: { activo },
+      select: { id: true, email: true, nombreCompleto: true, rol: true, activo: true },
+    });
+    return res.json(usuario);
+  } catch (error) {
+    return res.status(404).json({ message: "User not found" });
   }
 });
 

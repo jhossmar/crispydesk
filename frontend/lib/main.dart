@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:modelo_sqlite/menu.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:modelo_sqlite/features/auth/presentation/screens/auth_gate.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
@@ -8,7 +9,7 @@ void main() {
   if (kIsWeb) {
     databaseFactory = databaseFactoryFfiWeb;
   }
-  runApp(const MainApp());
+  runApp(const ProviderScope(child: MainApp()));
 }
 
 class MainApp extends StatelessWidget {
@@ -52,7 +53,7 @@ class MainApp extends StatelessWidget {
         ),
         drawerTheme: const DrawerThemeData(backgroundColor: Color(0xFF1A1A1A)),
       ),
-      home: const Menu(),
+      home: const AuthGate(),
     );
   }
 }
