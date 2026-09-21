@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:modelo_sqlite/features/productos/domain/entities/producto.dart';
-import 'package:modelo_sqlite/features/productos/presentation/widgets/categoria_visual.dart';
+import 'package:modelo_sqlite/features/productos/presentation/widgets/avatar_producto.dart';
 
 /// Reached from the product GridView in VentaScreen via a Hero transition.
 /// Returns the chosen cantidad via `Navigator.pop(context, cantidad)`, or
@@ -29,15 +29,7 @@ class _ProductoCantidadScreenState extends State<ProductoCantidadScreen> {
           children: [
             Hero(
               tag: 'producto-${producto.id}',
-              child: CircleAvatar(
-                radius: 56,
-                backgroundColor: producto.categoria.colorCategoria,
-                child: Icon(
-                  producto.categoria.iconoCategoria,
-                  color: Colors.black,
-                  size: 48,
-                ),
-              ),
+              child: AvatarProducto(producto: producto, radius: 56, iconSize: 48),
             ),
             const SizedBox(height: 20),
             Text(

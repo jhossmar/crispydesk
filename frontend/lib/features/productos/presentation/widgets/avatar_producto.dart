@@ -23,8 +23,14 @@ Uint8List? decodificarImagenProducto(String? imagen) {
 class AvatarProducto extends StatelessWidget {
   final Producto producto;
   final double radius;
+  final double? iconSize;
 
-  const AvatarProducto({super.key, required this.producto, this.radius = 24});
+  const AvatarProducto({
+    super.key,
+    required this.producto,
+    this.radius = 24,
+    this.iconSize,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +41,11 @@ class AvatarProducto extends StatelessWidget {
     return CircleAvatar(
       radius: radius,
       backgroundColor: producto.categoria.colorCategoria,
-      child: Icon(producto.categoria.iconoCategoria, color: Colors.black),
+      child: Icon(
+        producto.categoria.iconoCategoria,
+        color: Colors.black,
+        size: iconSize,
+      ),
     );
   }
 }
