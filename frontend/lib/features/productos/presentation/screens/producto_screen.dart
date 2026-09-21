@@ -35,14 +35,37 @@ class _ProductoScreenState extends ConsumerState<ProductoScreen> {
   bool _quitarImagen = false;
 
   Future<void> _elegirImagen() async {
+    final origen = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (bottomSheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera, color: Colors.orangeAccent),
+              title: const Text('Tomar foto'),
+              onTap: () => Navigator.pop(bottomSheetContext, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library, color: Colors.orangeAccent),
+              title: const Text('Elegir de galería'),
+              onTap: () => Navigator.pop(bottomSheetContext, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (origen == null) return;
+
     final archivo = await _picker.pickImage(
-      source: ImageSource.gallery,
+      source: origen,
       maxWidth: 800,
       maxHeight: 800,
       imageQuality: 70,
     );
     if (archivo == null) return;
     final bytes = await archivo.readAsBytes();
+    if (!mounted) return;
     setState(() {
       _imagenBytesNueva = bytes;
       _quitarImagen = false;
