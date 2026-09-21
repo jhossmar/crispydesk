@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modelo_sqlite/core/routes/app_routes.dart';
 import 'package:modelo_sqlite/features/auth/domain/entities/usuario.dart';
 import 'package:modelo_sqlite/features/auth/presentation/providers/auth_providers.dart';
+import 'package:modelo_sqlite/features/auth/presentation/widgets/cambiar_password_dialog.dart';
 
 class Menu extends ConsumerWidget {
   const Menu({super.key});
@@ -170,6 +171,20 @@ class Menu extends ConsumerWidget {
               },
             ),
             const Divider(color: Colors.white24),
+            ListTile(
+              leading: const Icon(Icons.lock_outline, color: Colors.orangeAccent),
+              title: const Text('Cambiar contraseña', style: TextStyle(fontSize: 18)),
+              onTap: () {
+                Navigator.pop(context);
+                if (usuario == null) return;
+                mostrarDialogoCambiarPassword(
+                  context,
+                  ref,
+                  id: usuario.id,
+                  esPropia: true,
+                );
+              },
+            ),
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.redAccent),
               title: const Text('Cerrar sesión', style: TextStyle(fontSize: 18)),

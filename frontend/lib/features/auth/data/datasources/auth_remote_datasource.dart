@@ -120,4 +120,30 @@ class AuthRemoteDataSource {
       throw AuthException(cuerpo['message'] as String? ?? 'No se pudo actualizar el usuario');
     }
   }
+
+  /// Changes a user's password. [passwordActual] is required when changing
+  /// one's own password and omitted for an admin's reset of another user's.
+  Future<void> cambiarPassword({
+    required String token,
+    required int id,
+    String? passwordActual,
+    required String passwordNueva,
+  }) async {
+    final respuesta = await _client.patch(
+      Uri.parse('$backendBaseUrl/users/$id/password'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        if (passwordActual != null) 'passwordActual': passwordActual,
+        'passwordNueva': passwordNueva,
+      }),
+    );
+
+    if (respuesta.statusCode != 204) {
+      final cuerpo = jsonDecode(respuesta.body) as Map<String, dynamic>;
+      throw AuthException(cuerpo['message'] as String? ?? 'No se pudo cambiar la contraseña');
+    }
+  }
 }

@@ -46,4 +46,13 @@ abstract class AuthRepository {
   /// backend routes without duplicating secure-storage access. Null if
   /// there's no active session.
   Future<String?> obtenerToken();
+
+  /// Changes a user's password. Pass [passwordActual] when the user is
+  /// changing their own password (verified by the backend); omit it when
+  /// an Administrador is resetting another user's password.
+  Future<void> cambiarPassword({
+    required int id,
+    String? passwordActual,
+    required String passwordNueva,
+  });
 }

@@ -100,4 +100,19 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<String?> obtenerToken() => _storage.read(key: _claveToken);
+
+  @override
+  Future<void> cambiarPassword({
+    required int id,
+    String? passwordActual,
+    required String passwordNueva,
+  }) async {
+    final token = await _tokenRequerido();
+    await _remoto.cambiarPassword(
+      token: token,
+      id: id,
+      passwordActual: passwordActual,
+      passwordNueva: passwordNueva,
+    );
+  }
 }

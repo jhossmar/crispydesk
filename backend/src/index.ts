@@ -193,6 +193,46 @@ app.patch("/users/:id", authenticateToken, requireAdmin, async (req: Request, re
   }
 });
 
+// Two cases in one endpoint:
+// - A user changing their OWN password: must provide passwordActual, which
+//   is verified against the stored hash.
+// - An Administrador resetting ANY user's password (e.g. a locked-out
+//   Cajera): no passwordActual needed, admin override.
+app.patch("/users/:id/password", authenticateToken, async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const { passwordActual, passwordNueva } = req.body || {};
+
+  if (!passwordNueva || String(passwordNueva).length < 4) {
+    return res.status(400).json({ message: "passwordNueva debe tener al menos 4 caracteres" });
+  }
+
+  const esUnoMismo = req.user!.id === id;
+  const esAdmin = req.user!.rol === "ADMINISTRADOR";
+  if (!esUnoMismo && !esAdmin) {
+    return res.status(403).json({ message: "No autorizado para cambiar esta contraseña" });
+  }
+
+  try {
+    const usuario = await prisma.user.findUniqueOrThrow({ where: { id } });
+
+    if (esUnoMismo) {
+      if (!passwordActual) {
+        return res.status(400).json({ message: "passwordActual is required" });
+      }
+      const coincide = await bcrypt.compare(passwordActual, usuario.password);
+      if (!coincide) {
+        return res.status(401).json({ message: "La contraseña actual no coincide" });
+      }
+    }
+
+    const hashedPassword = await bcrypt.hash(passwordNueva, 10);
+    await prisma.user.update({ where: { id }, data: { password: hashedPassword } });
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(404).json({ message: "Usuario no encontrado" });
+  }
+});
+
 app.get("/users", authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   const usuarios = await prisma.user.findMany({
     select: { id: true, email: true, nombreCompleto: true, rol: true, activo: true },

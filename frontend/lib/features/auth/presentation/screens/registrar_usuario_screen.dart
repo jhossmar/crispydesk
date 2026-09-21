@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modelo_sqlite/features/auth/domain/entities/usuario.dart';
 import 'package:modelo_sqlite/features/auth/presentation/providers/auth_providers.dart';
+import 'package:modelo_sqlite/features/auth/presentation/widgets/cambiar_password_dialog.dart';
 
 class RegistrarUsuarioScreen extends ConsumerStatefulWidget {
   const RegistrarUsuarioScreen({super.key});
@@ -315,6 +316,17 @@ class _RegistrarUsuarioScreenState
                         tooltip: 'Editar',
                         icon: const Icon(Icons.edit, color: Colors.greenAccent),
                         onPressed: () => _editarUsuario(usuario),
+                      ),
+                      IconButton(
+                        tooltip: 'Restablecer contraseña',
+                        icon: const Icon(Icons.lock_reset, color: Colors.orangeAccent),
+                        onPressed: () => mostrarDialogoCambiarPassword(
+                          context,
+                          ref,
+                          id: usuario.id,
+                          esPropia: false,
+                          nombreUsuario: usuario.nombreCompleto,
+                        ),
                       ),
                       Switch(
                         value: usuario.activo,
