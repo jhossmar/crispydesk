@@ -41,4 +41,9 @@ abstract class AuthRepository {
     required String nombreCompleto,
     required RolUsuario rol,
   });
+
+  /// The current session's token, so other features can call protected
+  /// backend routes without duplicating secure-storage access. Null if
+  /// there's no active session.
+  Future<String?> obtenerToken();
 }

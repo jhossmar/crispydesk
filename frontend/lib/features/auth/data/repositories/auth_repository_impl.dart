@@ -97,4 +97,7 @@ class AuthRepositoryImpl implements AuthRepository {
       rol: rol == RolUsuario.administrador ? 'ADMINISTRADOR' : 'CAJERA',
     );
   }
+
+  @override
+  Future<String?> obtenerToken() => _storage.read(key: _claveToken);
 }

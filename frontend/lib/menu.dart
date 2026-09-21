@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:modelo_sqlite/cruds/producto.dart';
-import 'package:modelo_sqlite/cruds/venta.dart';
+import 'package:modelo_sqlite/core/routes/app_routes.dart';
 import 'package:modelo_sqlite/features/auth/domain/entities/usuario.dart';
 import 'package:modelo_sqlite/features/auth/presentation/providers/auth_providers.dart';
-import 'package:modelo_sqlite/features/auth/presentation/screens/registrar_usuario_screen.dart';
-import 'package:modelo_sqlite/listados/listado_ventas.dart';
-import 'package:modelo_sqlite/estadisticas/estadisticas.dart';
-import 'package:modelo_sqlite/reportes/reporte_fechas.dart';
 
 class Menu extends ConsumerWidget {
   const Menu({super.key});
@@ -100,10 +95,7 @@ class Menu extends ConsumerWidget {
                 subtitle: const Text('Platos de pollo y bebidas'),
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Producto()),
-                  );
+                  Navigator.pushNamed(context, AppRoutes.productos);
                 },
               ),
             if (usuario?.rol == RolUsuario.administrador)
@@ -113,12 +105,17 @@ class Menu extends ConsumerWidget {
                 subtitle: const Text('Crear cuentas de acceso'),
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const RegistrarUsuarioScreen(),
-                    ),
-                  );
+                  Navigator.pushNamed(context, AppRoutes.usuarios);
+                },
+              ),
+            if (usuario?.rol == RolUsuario.administrador)
+              ListTile(
+                leading: const Icon(Icons.calculate, color: Colors.orangeAccent),
+                title: const Text('Gastos', style: TextStyle(fontSize: 18)),
+                subtitle: const Text('Egresos y ganancia real'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, AppRoutes.gastos);
                 },
               ),
             ListTile(
@@ -130,10 +127,7 @@ class Menu extends ConsumerWidget {
               subtitle: const Text('Nueva comanda / venta'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Venta()),
-                );
+                Navigator.pushNamed(context, AppRoutes.venta);
               },
             ),
             ListTile(
@@ -142,10 +136,16 @@ class Menu extends ConsumerWidget {
               subtitle: const Text('Listado de comandas registradas'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ListadoVentas()),
-                );
+                Navigator.pushNamed(context, AppRoutes.historialVentas);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.point_of_sale_outlined, color: Colors.orangeAccent),
+              title: const Text('Cierre de Caja', style: TextStyle(fontSize: 18)),
+              subtitle: const Text('Cierre y reconciliación de caja'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, AppRoutes.cierreCaja);
               },
             ),
             ListTile(
@@ -154,10 +154,7 @@ class Menu extends ConsumerWidget {
               subtitle: const Text('Resumen del día y ranking'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Estadisticas()),
-                );
+                Navigator.pushNamed(context, AppRoutes.estadisticas);
               },
             ),
             ListTile(
@@ -169,10 +166,7 @@ class Menu extends ConsumerWidget {
               subtitle: const Text('Diario o por rango de fechas'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ReporteFechas()),
-                );
+                Navigator.pushNamed(context, AppRoutes.reportes);
               },
             ),
             const Divider(color: Colors.white24),

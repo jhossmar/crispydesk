@@ -1,7 +1,5 @@
 // CrispyDesk backend - Prisma schema
-// This backend only owns Auth (users/roles). Business data (productos,
-// ventas, inventario, combos, etc.) lives locally on-device in Drift so
-// the POS keeps working offline; see the Flutter app for that schema.
+// Owns Auth (users/roles) and business data (productos, ventas, ...).
 
 generator client {
   provider = "prisma-client-js"
@@ -17,6 +15,12 @@ enum Rol {
   CAJERA
 }
 
+enum FormaPago {
+  EFECTIVO
+  QR
+  MIXTO
+}
+
 model User {
   id             Int      @id @default(autoincrement())
   email          String   @unique
@@ -25,4 +29,66 @@ model User {
   rol            Rol      @default(CAJERA)
   activo         Boolean  @default(true)
   createdAt      DateTime @default(now())
+}
+
+model Producto {
+  id             Int            @id @default(autoincrement())
+  nombreProducto String         @unique
+  categoria      String
+  precioProducto Float
+  stockProducto  Int            @default(0)
+  createdAt      DateTime       @default(now())
+  detalles       DetalleVenta[]
+}
+
+model Venta {
+  id            Int            @id @default(autoincrement())
+  fechaVenta    DateTime       @default(now())
+  totalVenta    Float
+  formaPago     FormaPago      @default(EFECTIVO)
+  montoEfectivo Float          @default(0)
+  montoQr       Float          @default(0)
+  detalles      DetalleVenta[]
+}
+
+model DetalleVenta {
+  id             Int      @id @default(autoincrement())
+  ventaId        Int
+  venta          Venta    @relation(fields: [ventaId], references: [id], onDelete: Cascade)
+  productoId     Int
+  producto       Producto @relation(fields: [productoId], references: [id])
+  nombreProducto String
+  cantidad       Int
+  precioUnitario Float
+  subtotal       Float
+  // Purely descriptive (e.g. corte de pollo elegido). Doesn't affect stock
+  // or price - just a note carried along with this line for the receipt/history.
+  nota           String?
+}
+
+// A closing snapshot: totals for all Ventas between the previous Cierre's
+// fechaCierre (or the beginning of time, for the first one) and this one's
+// fechaCierre. Ventas are never moved/deleted on close - periods are just
+// derived from these timestamp boundaries.
+model Cierre {
+  id               Int      @id @default(autoincrement())
+  fechaInicio      DateTime
+  fechaCierre      DateTime @default(now())
+  cantidadVentas   Int
+  totalEfectivo    Float
+  totalQr          Float
+  totalGeneral     Float
+  cerradoPorId     Int
+  cerradoPorNombre String
+}
+
+model Gasto {
+  id                  Int      @id @default(autoincrement())
+  fecha               DateTime
+  categoria           String
+  monto               Float
+  descripcion         String?
+  registradoPorId     Int
+  registradoPorNombre String
+  createdAt           DateTime @default(now())
 }
