@@ -1,4 +1,4 @@
-package com.example.modelo_sqlite_
+package com.crispydesk.pos
 
 import io.flutter.embedding.android.FlutterActivity
 
