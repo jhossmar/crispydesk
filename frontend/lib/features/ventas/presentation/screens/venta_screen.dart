@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modelo_sqlite/core/routes/app_routes.dart';
 import 'package:modelo_sqlite/features/productos/domain/entities/producto.dart';
 import 'package:modelo_sqlite/features/productos/presentation/providers/producto_providers.dart';
-import 'package:modelo_sqlite/features/productos/presentation/widgets/categoria_visual.dart';
+import 'package:modelo_sqlite/features/productos/presentation/widgets/avatar_producto.dart';
 import 'package:modelo_sqlite/features/ventas/domain/entities/venta.dart';
 import 'package:modelo_sqlite/features/ventas/domain/repositories/venta_repository.dart';
 import 'package:modelo_sqlite/features/ventas/presentation/providers/venta_providers.dart';
@@ -382,13 +382,7 @@ class _VentaScreenState extends ConsumerState<VentaScreen> {
                           children: [
                             Hero(
                               tag: 'producto-${producto.id}',
-                              child: CircleAvatar(
-                                backgroundColor: producto.categoria.colorCategoria,
-                                child: Icon(
-                                  producto.categoria.iconoCategoria,
-                                  color: Colors.black,
-                                ),
-                              ),
+                              child: AvatarProducto(producto: producto),
                             ),
                             const SizedBox(height: 6),
                             Text(

@@ -4,6 +4,7 @@ class Producto {
   final String categoria;
   final double precioProducto;
   final int stockProducto;
+  final String? imagen;
 
   const Producto({
     required this.id,
@@ -11,6 +12,7 @@ class Producto {
     required this.categoria,
     required this.precioProducto,
     required this.stockProducto,
+    this.imagen,
   });
 
   factory Producto.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class Producto {
       categoria: json['categoria'] as String,
       precioProducto: (json['precioProducto'] as num).toDouble(),
       stockProducto: json['stockProducto'] as int,
+      imagen: json['imagen'] as String?,
     );
   }
 

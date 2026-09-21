@@ -62,6 +62,15 @@ class $CachedProductosTable extends CachedProductos
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _imagenMeta = const VerificationMeta('imagen');
+  @override
+  late final GeneratedColumn<String> imagen = GeneratedColumn<String>(
+    'imagen',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -69,6 +78,7 @@ class $CachedProductosTable extends CachedProductos
     categoria,
     precioProducto,
     stockProducto,
+    imagen,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -126,6 +136,12 @@ class $CachedProductosTable extends CachedProductos
     } else if (isInserting) {
       context.missing(_stockProductoMeta);
     }
+    if (data.containsKey('imagen')) {
+      context.handle(
+        _imagenMeta,
+        imagen.isAcceptableOrUnknown(data['imagen']!, _imagenMeta),
+      );
+    }
     return context;
   }
 
@@ -155,6 +171,10 @@ class $CachedProductosTable extends CachedProductos
         DriftSqlType.int,
         data['${effectivePrefix}stock_producto'],
       )!,
+      imagen: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}imagen'],
+      ),
     );
   }
 
@@ -170,12 +190,14 @@ class CachedProducto extends DataClass implements Insertable<CachedProducto> {
   final String categoria;
   final double precioProducto;
   final int stockProducto;
+  final String? imagen;
   const CachedProducto({
     required this.id,
     required this.nombreProducto,
     required this.categoria,
     required this.precioProducto,
     required this.stockProducto,
+    this.imagen,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -185,6 +207,9 @@ class CachedProducto extends DataClass implements Insertable<CachedProducto> {
     map['categoria'] = Variable<String>(categoria);
     map['precio_producto'] = Variable<double>(precioProducto);
     map['stock_producto'] = Variable<int>(stockProducto);
+    if (!nullToAbsent || imagen != null) {
+      map['imagen'] = Variable<String>(imagen);
+    }
     return map;
   }
 
@@ -195,6 +220,9 @@ class CachedProducto extends DataClass implements Insertable<CachedProducto> {
       categoria: Value(categoria),
       precioProducto: Value(precioProducto),
       stockProducto: Value(stockProducto),
+      imagen: imagen == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imagen),
     );
   }
 
@@ -209,6 +237,7 @@ class CachedProducto extends DataClass implements Insertable<CachedProducto> {
       categoria: serializer.fromJson<String>(json['categoria']),
       precioProducto: serializer.fromJson<double>(json['precioProducto']),
       stockProducto: serializer.fromJson<int>(json['stockProducto']),
+      imagen: serializer.fromJson<String?>(json['imagen']),
     );
   }
   @override
@@ -220,6 +249,7 @@ class CachedProducto extends DataClass implements Insertable<CachedProducto> {
       'categoria': serializer.toJson<String>(categoria),
       'precioProducto': serializer.toJson<double>(precioProducto),
       'stockProducto': serializer.toJson<int>(stockProducto),
+      'imagen': serializer.toJson<String?>(imagen),
     };
   }
 
@@ -229,12 +259,14 @@ class CachedProducto extends DataClass implements Insertable<CachedProducto> {
     String? categoria,
     double? precioProducto,
     int? stockProducto,
+    Value<String?> imagen = const Value.absent(),
   }) => CachedProducto(
     id: id ?? this.id,
     nombreProducto: nombreProducto ?? this.nombreProducto,
     categoria: categoria ?? this.categoria,
     precioProducto: precioProducto ?? this.precioProducto,
     stockProducto: stockProducto ?? this.stockProducto,
+    imagen: imagen.present ? imagen.value : this.imagen,
   );
   CachedProducto copyWithCompanion(CachedProductosCompanion data) {
     return CachedProducto(
@@ -249,6 +281,7 @@ class CachedProducto extends DataClass implements Insertable<CachedProducto> {
       stockProducto: data.stockProducto.present
           ? data.stockProducto.value
           : this.stockProducto,
+      imagen: data.imagen.present ? data.imagen.value : this.imagen,
     );
   }
 
@@ -259,14 +292,21 @@ class CachedProducto extends DataClass implements Insertable<CachedProducto> {
           ..write('nombreProducto: $nombreProducto, ')
           ..write('categoria: $categoria, ')
           ..write('precioProducto: $precioProducto, ')
-          ..write('stockProducto: $stockProducto')
+          ..write('stockProducto: $stockProducto, ')
+          ..write('imagen: $imagen')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, nombreProducto, categoria, precioProducto, stockProducto);
+  int get hashCode => Object.hash(
+    id,
+    nombreProducto,
+    categoria,
+    precioProducto,
+    stockProducto,
+    imagen,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -275,7 +315,8 @@ class CachedProducto extends DataClass implements Insertable<CachedProducto> {
           other.nombreProducto == this.nombreProducto &&
           other.categoria == this.categoria &&
           other.precioProducto == this.precioProducto &&
-          other.stockProducto == this.stockProducto);
+          other.stockProducto == this.stockProducto &&
+          other.imagen == this.imagen);
 }
 
 class CachedProductosCompanion extends UpdateCompanion<CachedProducto> {
@@ -284,12 +325,14 @@ class CachedProductosCompanion extends UpdateCompanion<CachedProducto> {
   final Value<String> categoria;
   final Value<double> precioProducto;
   final Value<int> stockProducto;
+  final Value<String?> imagen;
   const CachedProductosCompanion({
     this.id = const Value.absent(),
     this.nombreProducto = const Value.absent(),
     this.categoria = const Value.absent(),
     this.precioProducto = const Value.absent(),
     this.stockProducto = const Value.absent(),
+    this.imagen = const Value.absent(),
   });
   CachedProductosCompanion.insert({
     this.id = const Value.absent(),
@@ -297,6 +340,7 @@ class CachedProductosCompanion extends UpdateCompanion<CachedProducto> {
     required String categoria,
     required double precioProducto,
     required int stockProducto,
+    this.imagen = const Value.absent(),
   }) : nombreProducto = Value(nombreProducto),
        categoria = Value(categoria),
        precioProducto = Value(precioProducto),
@@ -307,6 +351,7 @@ class CachedProductosCompanion extends UpdateCompanion<CachedProducto> {
     Expression<String>? categoria,
     Expression<double>? precioProducto,
     Expression<int>? stockProducto,
+    Expression<String>? imagen,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -314,6 +359,7 @@ class CachedProductosCompanion extends UpdateCompanion<CachedProducto> {
       if (categoria != null) 'categoria': categoria,
       if (precioProducto != null) 'precio_producto': precioProducto,
       if (stockProducto != null) 'stock_producto': stockProducto,
+      if (imagen != null) 'imagen': imagen,
     });
   }
 
@@ -323,6 +369,7 @@ class CachedProductosCompanion extends UpdateCompanion<CachedProducto> {
     Value<String>? categoria,
     Value<double>? precioProducto,
     Value<int>? stockProducto,
+    Value<String?>? imagen,
   }) {
     return CachedProductosCompanion(
       id: id ?? this.id,
@@ -330,6 +377,7 @@ class CachedProductosCompanion extends UpdateCompanion<CachedProducto> {
       categoria: categoria ?? this.categoria,
       precioProducto: precioProducto ?? this.precioProducto,
       stockProducto: stockProducto ?? this.stockProducto,
+      imagen: imagen ?? this.imagen,
     );
   }
 
@@ -351,6 +399,9 @@ class CachedProductosCompanion extends UpdateCompanion<CachedProducto> {
     if (stockProducto.present) {
       map['stock_producto'] = Variable<int>(stockProducto.value);
     }
+    if (imagen.present) {
+      map['imagen'] = Variable<String>(imagen.value);
+    }
     return map;
   }
 
@@ -361,7 +412,8 @@ class CachedProductosCompanion extends UpdateCompanion<CachedProducto> {
           ..write('nombreProducto: $nombreProducto, ')
           ..write('categoria: $categoria, ')
           ..write('precioProducto: $precioProducto, ')
-          ..write('stockProducto: $stockProducto')
+          ..write('stockProducto: $stockProducto, ')
+          ..write('imagen: $imagen')
           ..write(')'))
         .toString();
   }
@@ -1326,6 +1378,7 @@ typedef $$CachedProductosTableCreateCompanionBuilder =
       required String categoria,
       required double precioProducto,
       required int stockProducto,
+      Value<String?> imagen,
     });
 typedef $$CachedProductosTableUpdateCompanionBuilder =
     CachedProductosCompanion Function({
@@ -1334,6 +1387,7 @@ typedef $$CachedProductosTableUpdateCompanionBuilder =
       Value<String> categoria,
       Value<double> precioProducto,
       Value<int> stockProducto,
+      Value<String?> imagen,
     });
 
 class $$CachedProductosTableFilterComposer
@@ -1367,6 +1421,11 @@ class $$CachedProductosTableFilterComposer
 
   ColumnFilters<int> get stockProducto => $composableBuilder(
     column: $table.stockProducto,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imagen => $composableBuilder(
+    column: $table.imagen,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1404,6 +1463,11 @@ class $$CachedProductosTableOrderingComposer
     column: $table.stockProducto,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get imagen => $composableBuilder(
+    column: $table.imagen,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CachedProductosTableAnnotationComposer
@@ -1435,6 +1499,9 @@ class $$CachedProductosTableAnnotationComposer
     column: $table.stockProducto,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get imagen =>
+      $composableBuilder(column: $table.imagen, builder: (column) => column);
 }
 
 class $$CachedProductosTableTableManager
@@ -1479,12 +1546,14 @@ class $$CachedProductosTableTableManager
                 Value<String> categoria = const Value.absent(),
                 Value<double> precioProducto = const Value.absent(),
                 Value<int> stockProducto = const Value.absent(),
+                Value<String?> imagen = const Value.absent(),
               }) => CachedProductosCompanion(
                 id: id,
                 nombreProducto: nombreProducto,
                 categoria: categoria,
                 precioProducto: precioProducto,
                 stockProducto: stockProducto,
+                imagen: imagen,
               ),
           createCompanionCallback:
               ({
@@ -1493,12 +1562,14 @@ class $$CachedProductosTableTableManager
                 required String categoria,
                 required double precioProducto,
                 required int stockProducto,
+                Value<String?> imagen = const Value.absent(),
               }) => CachedProductosCompanion.insert(
                 id: id,
                 nombreProducto: nombreProducto,
                 categoria: categoria,
                 precioProducto: precioProducto,
                 stockProducto: stockProducto,
+                imagen: imagen,
               ),
           withReferenceMapper: (p0) => p0
               .map(

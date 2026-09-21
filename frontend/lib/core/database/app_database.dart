@@ -12,7 +12,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(impl.connect());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   // This is a disposable read-cache (see tables.dart) - it gets fully
   // repopulated on the next successful fetch, so schema changes just drop

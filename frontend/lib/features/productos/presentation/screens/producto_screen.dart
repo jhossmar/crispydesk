@@ -1,8 +1,12 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:modelo_sqlite/features/productos/domain/entities/producto.dart';
 import 'package:modelo_sqlite/features/productos/presentation/providers/producto_providers.dart';
-import 'package:modelo_sqlite/features/productos/presentation/widgets/categoria_visual.dart';
+import 'package:modelo_sqlite/features/productos/presentation/widgets/avatar_producto.dart';
 
 class ProductoScreen extends ConsumerStatefulWidget {
   const ProductoScreen({super.key});
@@ -21,6 +25,44 @@ class _ProductoScreenState extends ConsumerState<ProductoScreen> {
   bool _guardando = false;
 
   final List<String> _categorias = ['Pollo', 'Bebida', 'Acompañamiento'];
+  final _picker = ImagePicker();
+
+  // Foto nueva elegida en este formulario (aún no guardada). Si es null y
+  // estamos editando, _imagenExistente conserva la foto que ya tenía el
+  // producto para mostrarla en la vista previa.
+  Uint8List? _imagenBytesNueva;
+  String? _imagenExistente;
+  bool _quitarImagen = false;
+
+  Future<void> _elegirImagen() async {
+    final archivo = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 800,
+      maxHeight: 800,
+      imageQuality: 70,
+    );
+    if (archivo == null) return;
+    final bytes = await archivo.readAsBytes();
+    setState(() {
+      _imagenBytesNueva = bytes;
+      _quitarImagen = false;
+    });
+  }
+
+  void _quitarImagenSeleccionada() {
+    setState(() {
+      _imagenBytesNueva = null;
+      _imagenExistente = null;
+      _quitarImagen = true;
+    });
+  }
+
+  /// La foto a enviar al backend: la nueva si se eligió una, o null si no
+  /// se tocó nada (el backend conserva la que ya tenía).
+  String? get _imagenParaGuardar {
+    if (_imagenBytesNueva == null) return null;
+    return 'data:image/jpeg;base64,${base64Encode(_imagenBytesNueva!)}';
+  }
 
   // ---------------------------------------------------------------------
   // Alta / edición de DATOS MAESTROS (nombre, categoría, precio).
@@ -37,6 +79,7 @@ class _ProductoScreenState extends ConsumerState<ProductoScreen> {
             categoria: _categoriaSeleccionada,
             precioProducto: double.tryParse(_precioUnitario.text) ?? 0.0,
             stockProducto: int.tryParse(_stockInicial.text) ?? 0,
+            imagen: _imagenParaGuardar,
           );
       _limpiarFormulario();
       ref.invalidate(listaProductosProvider);
@@ -64,6 +107,8 @@ class _ProductoScreenState extends ConsumerState<ProductoScreen> {
             nombreProducto: _nombreProducto.text.trim(),
             categoria: _categoriaSeleccionada,
             precioProducto: double.tryParse(_precioUnitario.text) ?? 0.0,
+            imagen: _imagenParaGuardar,
+            limpiarImagen: _quitarImagen && _imagenBytesNueva == null,
           );
       _limpiarFormulario();
       ref.invalidate(listaProductosProvider);
@@ -87,6 +132,9 @@ class _ProductoScreenState extends ConsumerState<ProductoScreen> {
     _stockInicial.clear();
     _categoriaSeleccionada = 'Pollo';
     _productoActivoId = null;
+    _imagenBytesNueva = null;
+    _imagenExistente = null;
+    _quitarImagen = false;
   }
 
   void _editarCampos(Producto item) {
@@ -94,6 +142,9 @@ class _ProductoScreenState extends ConsumerState<ProductoScreen> {
     _precioUnitario.text = item.precioProducto.toString();
     _categoriaSeleccionada = item.categoria;
     _productoActivoId = item.id;
+    _imagenBytesNueva = null;
+    _imagenExistente = item.imagen;
+    _quitarImagen = false;
   }
 
   // ---------------------------------------------------------------------
@@ -366,6 +417,55 @@ class _ProductoScreenState extends ConsumerState<ProductoScreen> {
                     ],
                   ),
                 ),
+              Center(
+                child: Stack(
+                  children: [
+                    GestureDetector(
+                      onTap: _elegirImagen,
+                      child: CircleAvatar(
+                        radius: 44,
+                        backgroundColor: const Color(0xFF1E1E1E),
+                        backgroundImage: _imagenBytesNueva != null
+                            ? MemoryImage(_imagenBytesNueva!)
+                            : decodificarImagenProducto(_imagenExistente) !=
+                                  null
+                            ? MemoryImage(
+                                decodificarImagenProducto(_imagenExistente)!,
+                              )
+                            : null,
+                        child:
+                            _imagenBytesNueva == null &&
+                                decodificarImagenProducto(_imagenExistente) ==
+                                    null
+                            ? const Icon(
+                                Icons.add_a_photo,
+                                color: Colors.white54,
+                              )
+                            : null,
+                      ),
+                    ),
+                    if (_imagenBytesNueva != null ||
+                        decodificarImagenProducto(_imagenExistente) != null)
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: GestureDetector(
+                          onTap: _quitarImagenSeleccionada,
+                          child: const CircleAvatar(
+                            radius: 13,
+                            backgroundColor: Colors.redAccent,
+                            child: Icon(
+                              Icons.close,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
               TextFormField(
                 controller: _nombreProducto,
                 style: const TextStyle(color: Colors.white),
@@ -536,13 +636,7 @@ class _ProductoScreenState extends ConsumerState<ProductoScreen> {
                           return Card(
                             margin: const EdgeInsets.symmetric(vertical: 6),
                             child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: item.categoria.colorCategoria,
-                                child: Icon(
-                                  item.categoria.iconoCategoria,
-                                  color: Colors.black,
-                                ),
-                              ),
+                              leading: AvatarProducto(producto: item),
                               title: Text(
                                 item.nombreProducto,
                                 style: const TextStyle(

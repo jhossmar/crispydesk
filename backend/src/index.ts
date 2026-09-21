@@ -14,7 +14,8 @@ if (!JWT_SECRET) {
 }
 
 app.use(cors());
-app.use(express.json());
+// Default 100kb limit is too small for base64-encoded product photos.
+app.use(express.json({ limit: "6mb" }));
 
 interface AuthPayload {
   id: number;
@@ -278,7 +279,7 @@ app.get("/productos", authenticateToken, async (req: Request, res: Response) => 
 });
 
 app.post("/productos", authenticateToken, requireAdmin, async (req: Request, res: Response) => {
-  const { nombreProducto, categoria, precioProducto, stockProducto } = req.body || {};
+  const { nombreProducto, categoria, precioProducto, stockProducto, imagen } = req.body || {};
 
   if (!nombreProducto || !categoria || precioProducto == null) {
     return res
@@ -293,6 +294,7 @@ app.post("/productos", authenticateToken, requireAdmin, async (req: Request, res
         categoria,
         precioProducto,
         stockProducto: stockProducto ?? 0,
+        imagen: imagen ?? null,
       },
     });
     return res.status(201).json(producto);
@@ -309,9 +311,9 @@ app.post("/productos", authenticateToken, requireAdmin, async (req: Request, res
 // inventory by accident.
 app.patch("/productos/:id", authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   const id = Number(req.params.id);
-  const { nombreProducto, categoria, precioProducto } = req.body || {};
+  const { nombreProducto, categoria, precioProducto, imagen } = req.body || {};
 
-  if (!nombreProducto && !categoria && precioProducto == null) {
+  if (!nombreProducto && !categoria && precioProducto == null && imagen === undefined) {
     return res.status(400).json({ message: "Nothing to update" });
   }
 
@@ -322,6 +324,9 @@ app.patch("/productos/:id", authenticateToken, requireAdmin, async (req: Request
         ...(nombreProducto ? { nombreProducto } : {}),
         ...(categoria ? { categoria } : {}),
         ...(precioProducto != null ? { precioProducto } : {}),
+        // imagen may be explicitly set to null to remove the photo, so it's
+        // included whenever the key is present at all (not just truthy).
+        ...(imagen !== undefined ? { imagen } : {}),
       },
     });
     return res.json(producto);

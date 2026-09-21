@@ -60,6 +60,7 @@ class ProductoRepositoryImpl implements ProductoRepository {
                 categoria: producto.categoria,
                 precioProducto: producto.precioProducto,
                 stockProducto: producto.stockProducto,
+                imagen: Value(producto.imagen),
               ),
             );
       }
@@ -76,6 +77,7 @@ class ProductoRepositoryImpl implements ProductoRepository {
             categoria: f.categoria,
             precioProducto: f.precioProducto,
             stockProducto: f.stockProducto,
+            imagen: f.imagen,
           ),
         )
         .toList();
@@ -87,6 +89,7 @@ class ProductoRepositoryImpl implements ProductoRepository {
     required String categoria,
     required double precioProducto,
     required int stockProducto,
+    String? imagen,
   }) async {
     final token = await _tokenRequerido();
     final json = await _remoto.crearProducto(
@@ -95,6 +98,7 @@ class ProductoRepositoryImpl implements ProductoRepository {
       categoria: categoria,
       precioProducto: precioProducto,
       stockProducto: stockProducto,
+      imagen: imagen,
     );
     return Producto.fromJson(json);
   }
@@ -105,6 +109,8 @@ class ProductoRepositoryImpl implements ProductoRepository {
     required String nombreProducto,
     required String categoria,
     required double precioProducto,
+    String? imagen,
+    bool limpiarImagen = false,
   }) async {
     final token = await _tokenRequerido();
     final json = await _remoto.actualizarDatos(
@@ -113,6 +119,8 @@ class ProductoRepositoryImpl implements ProductoRepository {
       nombreProducto: nombreProducto,
       categoria: categoria,
       precioProducto: precioProducto,
+      imagen: imagen,
+      limpiarImagen: limpiarImagen,
     );
     return Producto.fromJson(json);
   }

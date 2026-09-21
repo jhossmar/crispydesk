@@ -25,15 +25,19 @@ abstract class ProductoRepository {
     required String categoria,
     required double precioProducto,
     required int stockProducto,
+    String? imagen,
   });
 
-  /// Edits only nombreProducto/categoria/precioProducto. Stock is handled
-  /// exclusively by [ajustarStock].
+  /// Edits nombreProducto/categoria/precioProducto/imagen. Stock is handled
+  /// exclusively by [ajustarStock]. Pass [imagen] as null to leave the photo
+  /// unchanged, or [limpiarImagen] true to remove it.
   Future<Producto> actualizarDatos({
     required int id,
     required String nombreProducto,
     required String categoria,
     required double precioProducto,
+    String? imagen,
+    bool limpiarImagen = false,
   });
 
   /// Adjusts stock by a signed delta (positive = entrada, negative = salida).

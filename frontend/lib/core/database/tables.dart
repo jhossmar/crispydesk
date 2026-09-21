@@ -11,6 +11,7 @@ class CachedProductos extends Table {
   TextColumn get categoria => text()();
   RealColumn get precioProducto => real()();
   IntColumn get stockProducto => integer()();
+  TextColumn get imagen => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

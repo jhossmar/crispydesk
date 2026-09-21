@@ -37,6 +37,7 @@ model Producto {
   categoria      String
   precioProducto Float
   stockProducto  Int            @default(0)
+  imagen         String?        @db.Text
   createdAt      DateTime       @default(now())
   detalles       DetalleVenta[]
 }

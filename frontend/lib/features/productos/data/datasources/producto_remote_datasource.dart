@@ -32,6 +32,7 @@ class ProductoRemoteDataSource {
     required String categoria,
     required double precioProducto,
     required int stockProducto,
+    String? imagen,
   }) async {
     final respuesta = await _client.post(
       Uri.parse('$backendBaseUrl/productos'),
@@ -41,6 +42,7 @@ class ProductoRemoteDataSource {
         'categoria': categoria,
         'precioProducto': precioProducto,
         'stockProducto': stockProducto,
+        if (imagen != null) 'imagen': imagen,
       }),
     );
 
@@ -57,6 +59,8 @@ class ProductoRemoteDataSource {
     required String nombreProducto,
     required String categoria,
     required double precioProducto,
+    String? imagen,
+    bool limpiarImagen = false,
   }) async {
     final respuesta = await _client.patch(
       Uri.parse('$backendBaseUrl/productos/$id'),
@@ -65,6 +69,8 @@ class ProductoRemoteDataSource {
         'nombreProducto': nombreProducto,
         'categoria': categoria,
         'precioProducto': precioProducto,
+        if (imagen != null) 'imagen': imagen,
+        if (limpiarImagen) 'imagen': null,
       }),
     );
 
