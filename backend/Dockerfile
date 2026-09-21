@@ -26,6 +26,8 @@ ENV NODE_ENV=production
 # reads process.env.PORT, falling back to 3000 for local dev.
 EXPOSE 3000
 
-# Applies any pending migrations against DATABASE_URL before starting -
-# safe to run on every deploy, it's a no-op if there's nothing new.
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/index.js"]
+# Applies any pending migrations, then seeds the first admin account if it
+# doesn't already exist (seed.ts checks for it, so this is a safe no-op on
+# every subsequent deploy/restart) - without this, a fresh Postgres has an
+# empty User table and nobody could ever log in.
+CMD ["sh", "-c", "npx prisma migrate deploy && npx tsx prisma/seed.ts && node dist/src/index.js"]
